@@ -1,8 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans, DM_Mono } from 'next/font/google'
 import { Sora } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import { Toaster } from 'sonner'
+import { AuthProvider } from '@/context/AuthContext'
+import { CartProvider } from '@/context/CartContext'
 import { QueryProvider } from '@/lib/queryClient'
 import './globals.css'
+
+export const dynamic = 'force-dynamic';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -66,6 +72,7 @@ export default function RootLayout({
             </CartProvider>
           </AuthProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   )

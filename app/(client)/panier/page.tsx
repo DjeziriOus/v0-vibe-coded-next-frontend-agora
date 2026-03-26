@@ -9,7 +9,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { cn } from "@/lib/utils";
 
 export default function CartPage() {
-  const { items, total, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { items, subtotal, updateQuantity, removeFromCart, clearCart } = useCart();
+  const total = subtotal;
   
   // Group items by store
   const groupedItems = items.reduce((acc, item) => {
