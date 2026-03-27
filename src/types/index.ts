@@ -5,8 +5,9 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: "client" | "vendeur";
-  avatar?: string;
+  role: "buyer" | "seller";
+  emailVerified: boolean;
+  photo?: string;
 }
 
 export interface Store {
@@ -141,7 +142,7 @@ export interface RegisterPayload {
   lastName: string;
   email: string;
   password: string;
-  role: "client" | "vendeur";
+  role: "buyer" | "seller";
 }
 
 export interface LoginPayload {

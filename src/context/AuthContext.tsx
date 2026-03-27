@@ -9,106 +9,85 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 import type { User } from "@/types";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  isVendeur: boolean;
+  isSeller: boolean;
   isLoading: boolean;
+  /** true when the server rejected login specifically because email is unverified */
+  emailNotVerified: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
-    role: "client" | "vendeur";
+    role: "buyer" | "seller";
   }) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const MOCK_USERS: Record<string, { password: string; user: User }> = {
-  "client@agora.fr": {
-    password: "password123",
-    user: {
-      id: "u1",
-      email: "client@agora.fr",
-      firstName: "Marie",
-      lastName: "Dupont",
-      role: "client",
-    },
-  },
-  "vendeur@agora.fr": {
-    password: "password123",
-    user: {
-      id: "u2",
-      email: "vendeur@agora.fr",
-      firstName: "Jean",
-      lastName: "Martin",
-      role: "vendeur",
-    },
-  },
-};
+/** Map Better Auth session user → our User type */
+function mapUser(sessionUser: Record<string, unknown>): User {
+  return {
+    id: sessionUser.id as string,
+    email: sessionUser.email as string,
+    firstName: (sessionUser.firstName as string) ?? "",
+    lastName: (sessionUser.lastName as string) ?? "",
+    role: (sessionUser.role as "buyer" | "seller") ?? "buyer",
+    emailVerified: Boolean(sessionUser.emailVerified),
+    photo: (sessionUser.photo as string | undefined) ?? undefined,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
   const router = useRouter();
 
-  // Check for existing session on mount
+  // Hydrate session on mount
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const token = localStorage.getItem("agora_token");
-        const savedUser = localStorage.getItem("agora_user");
-        
-        if (token && savedUser) {
-          setUser(JSON.parse(savedUser));
-        }
-      } catch {
-        // Invalid stored data
-        localStorage.removeItem("agora_token");
-        localStorage.removeItem("agora_user");
-        localStorage.removeItem("agora_refresh");
-      } finally {
-        setIsLoading(false);
+    authClient.getSession().then(({ data }) => {
+      if (data?.user) {
+        setUser(mapUser(data.user as Record<string, unknown>));
       }
-    };
-
-    checkAuth();
+      setIsLoading(false);
+    });
   }, []);
 
   const login = useCallback(
     async (email: string, password: string) => {
       setIsLoading(true);
-      
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      // Mock authentication
-      const mockUser = MOCK_USERS[email.toLowerCase()];
-      
-      if (!mockUser || mockUser.password !== password) {
-        setIsLoading(false);
-        throw new Error("Email ou mot de passe incorrect");
-      }
-      
-      // Store tokens and user
-      localStorage.setItem("agora_token", "mock_access_token_" + Date.now());
-      localStorage.setItem("agora_refresh", "mock_refresh_token_" + Date.now());
-      localStorage.setItem("agora_user", JSON.stringify(mockUser.user));
-      
-      setUser(mockUser.user);
+      setEmailNotVerified(false);
+
+      const { data, error } = await authClient.signIn.email({ email, password });
+
       setIsLoading(false);
-      
-      // Redirect based on role
-      if (mockUser.user.role === "vendeur") {
-        router.push("/vendeur/dashboard");
-      } else {
-        router.push("/catalogue");
+
+      if (error) {
+        // Better Auth returns this code when email is not verified
+        if (
+          error.code === "EMAIL_NOT_VERIFIED" ||
+          error.status === 403 ||
+          (error.message ?? "").toLowerCase().includes("verif")
+        ) {
+          setEmailNotVerified(true);
+          return;
+        }
+        throw new Error(error.message ?? "Une erreur est survenue");
+      }
+
+      if (data?.user) {
+        const mapped = mapUser(data.user as Record<string, unknown>);
+        setUser(mapped);
+        router.push(mapped.role === "seller" ? "/vendeur/dashboard" : "/catalogue");
       }
     },
     [router]
@@ -120,60 +99,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       lastName: string;
       email: string;
       password: string;
-      role: "client" | "vendeur";
+      role: "buyer" | "seller";
     }) => {
       setIsLoading(true);
-      
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      // Check if user already exists
-      if (MOCK_USERS[data.email.toLowerCase()]) {
-        setIsLoading(false);
-        throw new Error("Un compte existe déjà avec cet email");
-      }
-      
-      // Create new user (in real app, this would be saved to backend)
-      const newUser: User = {
-        id: "u" + Date.now(),
+
+      const { error } = await authClient.signUp.email({
         email: data.email,
+        password: data.password,
+        name: `${data.firstName} ${data.lastName}`,
         firstName: data.firstName,
         lastName: data.lastName,
         role: data.role,
-      };
-      
-      // Store in mock database
-      MOCK_USERS[data.email.toLowerCase()] = {
-        password: data.password,
-        user: newUser,
-      };
-      
+      } as Parameters<typeof authClient.signUp.email>[0]);
+
       setIsLoading(false);
-      
-      // Redirect to login
-      router.push("/login?registered=true");
+
+      if (error) {
+        throw new Error(error.message ?? "Une erreur est survenue lors de l'inscription");
+      }
+      // Success — caller handles the UI message (no redirect)
     },
-    [router]
+    []
   );
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("agora_token");
-    localStorage.removeItem("agora_refresh");
-    localStorage.removeItem("agora_user");
+  const logout = useCallback(async () => {
+    await authClient.signOut();
     setUser(null);
     router.push("/login");
   }, [router]);
+
+  const resendVerification = useCallback(async (email: string) => {
+    const { error } = await authClient.sendVerificationEmail({
+      email,
+      callbackURL: "/verify-email",
+    });
+    if (error) throw new Error(error.message ?? "Impossible d'envoyer l'email");
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated: !!user,
-        isVendeur: user?.role === "vendeur",
+        isSeller: user?.role === "seller",
         isLoading,
+        emailNotVerified,
         login,
         register,
         logout,
+        resendVerification,
       }}
     >
       {children}
