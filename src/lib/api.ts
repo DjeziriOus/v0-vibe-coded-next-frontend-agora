@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from "@/config";
+const BASE_URL = API_URL;
 
 export class ApiError extends Error {
   constructor(
