@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShoppingCart, Search, Eye, Filter } from "lucide-react";
+import { ShoppingCart, Search, Eye, Filter, ShoppingCartIcon, Truck } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -92,7 +92,7 @@ export default function VendorOrdersPage() {
   if (error) {
     return (
       <EmptyState
-        icon={ShoppingCart}
+        icon={<Truck className="w-12 h-12" />}
         title="Erreur de chargement"
         description="Impossible de charger vos commandes."
         actionLabel="Réessayer"

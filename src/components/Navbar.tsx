@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -44,9 +45,15 @@ export function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-0 shrink-0"
           >
-            <Diamond className="w-6 h-6 text-[var(--agora-primary)]" />
+            <Image 
+                src="/logo.png" 
+                alt="Logo Agora" 
+                width={50} 
+                height={50} 
+                className="w-10 h-10 rounded-full object-cover" 
+              />
             <span className="font-display text-xl font-bold text-[var(--agora-primary)]">
               Agora
             </span>
@@ -133,7 +140,7 @@ export function Navbar() {
                         </p>
                       </div>
                       
-                      {user?.role === "vendeur" && (
+                      {user?.role === "seller" && (
                         <Link
                           href="/vendeur/dashboard"
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--agora-mid)] hover:text-[var(--agora-ink)] hover:bg-[var(--agora-accent)] transition-colors"

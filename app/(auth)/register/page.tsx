@@ -6,7 +6,7 @@ import { Eye, EyeOff, X, Diamond, User, Store } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
-type UserRole = "client" | "vendeur";
+type UserRole = "buyer" | "seller";
 
 function getPasswordStrength(password: string): {
   score: number;
@@ -114,10 +114,10 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setRole("client")}
+                  onClick={() => setRole("buyer")}
                   className={cn(
                     "flex items-center justify-center gap-2 py-3 px-4 rounded-[var(--radius-md)] border-2 font-medium text-sm transition-all",
-                    role === "client"
+                    role === "buyer"
                       ? "border-[var(--agora-primary)] bg-[var(--agora-accent)] text-[var(--agora-primary)]"
                       : "border-[var(--agora-line)] text-[var(--agora-mid)] hover:border-[var(--agora-primary)]/50"
                   )}
@@ -127,10 +127,10 @@ export default function RegisterPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRole("vendeur")}
+                  onClick={() => setRole("seller")}
                   className={cn(
                     "flex items-center justify-center gap-2 py-3 px-4 rounded-[var(--radius-md)] border-2 font-medium text-sm transition-all",
-                    role === "vendeur"
+                    role === "seller"
                       ? "border-[var(--agora-primary)] bg-[var(--agora-accent)] text-[var(--agora-primary)]"
                       : "border-[var(--agora-line)] text-[var(--agora-mid)] hover:border-[var(--agora-primary)]/50"
                   )}

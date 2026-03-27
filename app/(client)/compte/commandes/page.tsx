@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
 import Link from "next/link";
-import { Package, Eye, ChevronRight } from "lucide-react";
+import { Package, Eye, ChevronRight, PackageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -52,7 +52,7 @@ export default function OrdersPage() {
   if (error) {
     return (
       <EmptyState
-        icon={Package}
+        icon={<PackageIcon/>}
         title="Erreur de chargement"
         description="Impossible de charger vos commandes. Veuillez réessayer."
         actionLabel="Réessayer"

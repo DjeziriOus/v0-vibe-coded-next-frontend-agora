@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { mockProducts, mockCategories } from "@/lib/mockData";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import Image from "next/image";
 
 const categoryIcons: Record<string, string> = {
   Papeterie: "📝",
@@ -43,7 +44,15 @@ export default function HomePage() {
             <div className="max-w-3xl mx-auto text-center">
               {/* Logo Badge */}
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Diamond className="w-5 h-5 text-[var(--agora-gold)]" />
+                {/* <Diamond className="w-5 h-5 text-[var(--agora-gold)]" />
+                 */}
+                 <Image 
+                  src="/logo.png" 
+                  alt="Logo Agora" 
+                  width={20} 
+                  height={20} 
+                  className="w-5 h-5 rounded-full object-cover" 
+                />
                 <span className="text-white/80 text-sm font-medium">
                   La marketplace française
                 </span>

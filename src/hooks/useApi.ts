@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   productsApi,
-  storesApi,
-  categoriesApi,
+  // storesApi,
+  // categoriesApi,
   ordersApi,
-  cartApi,
-  vendorApi,
-  authApi,
+  // cartApi,
+  // vendorApi,
+  // authApi,
 } from "@/lib/api";
 import type { ProductQuery, ProductPayload, OrderPayload, StorePayload } from "@/types";
 
@@ -28,7 +28,7 @@ export const queryKeys = {
     all: ["categories"] as const,
   },
   orders: {
-    client: ["orders", "client"] as const,
+    buyer: ["orders", "buyer"] as const,
     detail: (id: string) => ["orders", "detail", id] as const,
     seller: ["orders", "seller"] as const,
     sellerDetail: (id: string) => ["orders", "seller", id] as const,
@@ -46,7 +46,8 @@ export const queryKeys = {
 export function useCurrentUser() {
   return useQuery({
     queryKey: queryKeys.auth.me,
-    queryFn: () => authApi.me(),
+    // queryFn: () => authApi.me(),
+    queryFn: () => {},
     retry: false,
   });
 }
@@ -70,14 +71,16 @@ export function useProduct(id: string) {
 export function useSellerProducts() {
   return useQuery({
     queryKey: queryKeys.products.seller,
-    queryFn: () => productsApi.getSellerProducts(),
+    // queryFn: () => productsApi.getSellerProducts(),
+    queryFn: () => {},
   });
 }
 
 export function useLowStockProducts() {
   return useQuery({
     queryKey: queryKeys.products.lowStock,
-    queryFn: () => vendorApi.getLowStockProducts(),
+    // queryFn: () => vendorApi.getLowStockProducts(),
+    queryFn: () => {},
   });
 }
 
@@ -106,7 +109,8 @@ export function useUpdateProduct() {
 export function useToggleProductActive() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => productsApi.toggleActive(id),
+    // mutationFn: (id: string) => productsApi.toggleActive(id),
+    // mutationFn: (id: string) => {},
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.seller });
     },
