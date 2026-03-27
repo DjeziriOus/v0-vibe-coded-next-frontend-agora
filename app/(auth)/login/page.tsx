@@ -12,31 +12,11 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
   const { login, isLoading } = useAuth();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (searchParams.get("registered") === "true") {
-      setShowSuccess(true);
-    }
-  }, [searchParams]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!email || !password) {
-      setError("Veuillez remplir tous les champs");
-      return;
-    }
-
-    try {
-      await login(email, password);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue");
-    }
-  };
+    const handleSubmit = async (e: React.FormEvent) => {// utilise setError et await login depuis useAuth et catch err et affiche le message d'erreur qui viens depuis le backend
+    };
 
   return (
     <div className="min-h-screen bg-[var(--agora-bg)] flex items-center justify-center p-4">
@@ -56,20 +36,6 @@ function LoginContent() {
             </p>
           </div>
 
-          {/* Success Banner */}
-          {showSuccess && (
-            <div className="mb-6 p-3 rounded-[var(--radius-md)] bg-[#E0F2F1] border border-[var(--agora-green)] flex items-center justify-between">
-              <p className="text-sm text-[#00796B]">
-                Compte créé avec succès ! Connectez-vous.
-              </p>
-              <button
-                onClick={() => setShowSuccess(false)}
-                className="text-[#00796B] hover:text-[#004D40]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
 
           {/* Error Banner */}
           {error && (
